@@ -69,4 +69,3 @@
   (GET "/assets/:id" [id] (asset id)))
 
 ;  (POST "/assets" [] "<h1>Created asset, should redirect"))
-
