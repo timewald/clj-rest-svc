@@ -2,7 +2,8 @@
   (:gen-class)
   (:use compojure.core
 	ring.adapter.jetty)
-  (:require [compojure.route :as route]))
+  (:require [clojure (string :as string) (set :as set)]
+	    [compojure.route :as route]))
 
 ; Service bootstrap plumbing for interactive or stand-alone processing
 
@@ -28,7 +29,7 @@
 (defn generator-name [method path]
   (let [filtered-path (filter #(seq %) path)
 	cleaned-path (map clean-param-name filtered-path)]
-  (keyword (str method "-" (clojure.string/join "-" cleaned-path)))))
+  (keyword (str method "-" (string/join "-" cleaned-path)))))
 
 (defn replace-name [name param-map]
   (if (is-param-name? name)
@@ -39,33 +40,67 @@
 (defn generator-function [path]
   (fn [params]
     (let [path-params (set (filter is-param-name? path))
-          query-params (clojure.set/difference (set params) path-params)
+          query-params (set/difference (set params) path-params)
 	  replaced-path (map #(replace-name % params) path)]
-      (clojure.string/join "/" replaced-path))))
+      (string/join "/" replaced-path))))
 
 (defn generator-map-entry [route]
-  (let [method (clojure.string/lower-case (str (first route)))
-	path (clojure.string/split (nth route 1) #"/")]
+  (let [method (string/lower-case (str (first route)))
+	path (string/split (nth route 1) #"/")]
     {(generator-name method path) (generator-function path)}))
 
 (defn defgenerators [args]
   (def *generators* (apply merge (map generator-map-entry args))))
 
-(defn generate [path-name param-map]
+(defn gen-url [path-name param-map]
   ((*generators* path-name) param-map))
+
+(defn gen-link [path-name param-map]
+  (let [href (gen-url path-name param-map)
+	method (apply str (rest (first (string/split (str path-name) #"-"))))
+	link {:link true}]
+    ^link {:method method :href (gen-url path-name param-map)}))
 
 (defmacro defroutes-and-generators [name & args]
   `(do (defgenerators '~args)
        (defroutes ~name ~@args)))
 
-(def *assets* (atom #{})
+(defn clj-resp [f] {:status 200
+		    :headers {"Content-Type" "x-application/clojure"}
+		    :body (binding [*print-meta* true] (prn-str f))})
 
-(defn assets [] "<h2>assets!</h2>")
+; Service implementation
+; TBD: split this into separate namespaces
 
-(defn asset [id] (str "<h2>asset " id "</h2>"))
+; model (sort of)
+(def *assets* (atom { 1 {:id 1 :title "asset 1" :desc "interesting 1" }
+		      2 {:id 2 :title "asset 2" :desc "interesting 2" }}))
+
+; views
+(defn assets-index-view [assets]
+  (clj-resp
+   (vec
+    (map
+     (fn [[k v]]
+       (assoc (dissoc v :desc)
+	 :details (gen-link :get-assets-id {:id (v :id)})))
+     assets))))
+
+(defn asset-show-view [asset] (clj-resp asset))
+
+; controllers
+
+(defn assets-index [] (assets-index-view @*assets*))
+
+(defn asset-show [id] (asset-show-view (@*assets* id)))
+
+;(defn asset-create [asset]
+;  (swap! *assets* assoc (asset :id) asset)
+;  {:status 201 :headers {"Location" "absolute URL goes here"} :body nil})
 
 (defroutes-and-generators example
-  (GET "/assets" [] (assets))
-  (GET "/assets/:id" [id] (asset id)))
+  (GET "/assets" [] (assets-index))
+  (GET "/assets/:id" [id] (asset-show (Integer/parseInt id)))
+  (POST "/assets" {body :body} body))
 
-;  (POST "/assets" [] "<h1>Created asset, should redirect"))
+
