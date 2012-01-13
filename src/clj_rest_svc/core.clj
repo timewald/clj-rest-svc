@@ -1,6 +1,5 @@
 (ns clj-rest-svc.core
-  (:use [ring :only [request]]
-        [ring.adapter.jetty :only [run-jetty]]
+  (:use [ring.adapter.jetty :only [run-jetty]]
 	[ring.middleware.params :only (wrap-params)]        
 	[ring.middleware.keyword-params :only [wrap-keyword-params]]
         [compojure.core :only [GET POST]]
@@ -12,9 +11,6 @@
 ; Service bootstrap plumbing for interactive or stand-alone processing
 
 (def clj-mime-type "x-application/clojure")
-
-(defn string-to-clj [s]
-
 
 (defn clj-resp
   ([form] (clj-resp 200 form))
