@@ -6,5 +6,6 @@
 		 [compojure "0.6.0-RC1"]
                  [ring "0.3.6"]
 		 [ring/ring-jetty-adapter "0.3.6"]]
-  :dev-dependencies [[swank-clojure "1.3.0-SNAPSHOT"]])
+  :dev-dependencies [[swank-clojure "1.3.0-SNAPSHOT"]]
+  :main clj-rest-svc.core)
 ;  :dev-dependencies [[swank-clojure "1.2.1"]])
