@@ -1,19 +1,19 @@
 # clj-rest-svc
 
-FIXME: write description
+A Hypermedia API written in Clojure.
 
 ## Usage
 
 Once you have the server running with `lein run`, you can use `curl` to view responses from the server:
 
 ```
-curl http://localhost:8080/assets
+$ curl http://localhost:8080/assets
 (
 	{
 		:details {:method "get", :href "/assets/1"},
 	 	:id 1, 
 	 	:title "asset 1"
-	 }
+	}
  	{	
  		:details {:method "get", :href "/assets/2"},
  		:id 2,
