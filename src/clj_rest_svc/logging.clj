@@ -15,5 +15,4 @@
     (let [response (handler request)]
       (if-not (re-find static-file-regex (:uri request))
 	(debug (str prefix " Response: " (with-out-str (pprint response)))))
-      response)))
-	
+      response)))	

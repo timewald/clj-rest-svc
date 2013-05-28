@@ -50,5 +50,3 @@
 (defmacro defroutes-and-generators [name & args]
   `(do (defgenerators '~args)
        (defroutes ~name ~@args)))
-
-

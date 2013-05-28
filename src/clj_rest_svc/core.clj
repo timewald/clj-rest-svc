@@ -31,11 +31,6 @@
 	    (app (assoc req :clj-req clj-req)))
 	(app req)))))
         	
-;
-;	(app req)))))
-
-
-
 ; Service implementation
 
 ; model
@@ -66,7 +61,6 @@
 ;  (swap! *assets* assoc (asset :id) asset)
 ;  {:status 201 :headers {"Location" "absolute URL goes here"} :body nil})
 
-
 (defroutes-and-generators routes
   (GET "/assets" [] (assets-index))
   (GET "/assets/:id" [id] (asset-show (Integer/parseInt id)))
@@ -85,5 +79,3 @@
 (defn- start-dev-server [] (.start (Thread. start-server)))
 
 (defn -main [& args] (start-server))
-
-
